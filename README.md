@@ -1,25 +1,51 @@
-# facial_expressions
-A set of images for classifying facial expressions
+# Facial expressions
 
-This repository is a dataset of different facial expressions used for 
-training machine learning algorithms.
+This repository is a fork of the original **muxspace/facial_expressions** repository. It adds a convenient script called `process_images.py` that processes the images in the `/images` folder and stores the information in an HDF5 file, ready to be used in machine learning algorithms.
 
-It is created by my machine learning graduate students.
+# Setup
 
-# Submissions
-Please do not use large image files. In general, images should be under 50KB.
-Consider that 1000 images at 50KB each is approximately 50MB
+Clone this repository on your computer, and then run
+```
+$ python process_images.py
+```
+You must have Python 2.7 installed. Note that the script uses all of the following libraries, which you must have installed:
+```python
+import h5py
+import numpy as np
+import scipy
+from scipy import ndimage
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+from PIL import Image
+import csv
+import math
+import os
+```
+Once you run the script, it will create a file called `dataset.hdf5` in the same directory as the script. It will have a size of **~800 MB**.
 
 # Structure
-There are two directories. The `images` directory contains raw images. These
-are unprocessed. The `data` directory contains files specific to training.
-Most importantly, this includes the `legend.csv`, which maps an image in the
-`images` directory with a facial expression. 
 
-This file also has a user ID field. Please use something unique.
-It is primarily for tracking which students added which files.
-The IDs can be used for a secondary analysis to determine
-whether there are any patterns to the submissions.
+The HDF5 file created will have the following structure:
 
-# Emotions
-The set of emoions used are TBD
+- training
+  - X
+  - Y
+- validation
+  - X
+  - Y
+- test
+  - X
+  - Y
+
+There are three groups, `training`, `validation`, and `test`, each with its corresponding `X` and `Y` datasets. `X` corresponds to the images, and `Y` to the labels. You can access each dataset using the `h5py` module in Python:
+```python
+import h5py
+dset = h5py.File(filename, 'r')
+training_X = dset['training/X']
+training_Y = dset['training/Y']
+```
+
+# Shapes
+Each `X` dataset is of shape **(batch_size, height, width, channels)**. In this case, we will be dealing only with 128x128 grayscale images, so the shapes for all the `X` datasets is `(batch_size, 128, 128, 1)`.
+
+Each `Y` dataset is of shape **(batch_size, 1)**, where each entry is either `0` or `1`. A `0` corresponds to "neutral", indicating that the picture was of a neutral face, while a `1` corresponds to "happiness", indicating that the picture was of a face showing happiness (smiling).
